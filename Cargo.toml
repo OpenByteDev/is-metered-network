@@ -1,0 +1,28 @@
+[package]
+name = "is-metered-network"
+version = "0.1.0"
+description = "Cross-platform detection of whether the current network connection is metered."
+readme = "README.md"
+repository = "https://github.com/OpenByteDev/is-metered-network"
+homepage = "https://github.com/OpenByteDev/is-metered-network"
+documentation = "https://docs.rs/is-metered-network"
+license = "MIT"
+authors = ["OpenByte <development.openbyte@gmail.com>"]
+edition = "2024"
+categories = ["os", "network-programming"]
+keywords = ["metered", "network", "connection", "data-usage"]
+
+[dependencies]
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", default-features = false, features = [
+    "Win32_Foundation",
+    "Win32_Networking_NetworkListManager",
+    "Win32_System_Com",
+] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+zbus = { version = "5.7", default-features = false, features = ["async-io", "blocking-api"] }
+
+[package.metadata.docs.rs]
+targets = ["x86_64-pc-windows-msvc", "x86_64-unknown-linux-gnu"]
