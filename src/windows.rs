@@ -1,7 +1,7 @@
 use std::{io, mem::MaybeUninit, ptr};
 
 use windows::Win32::{
-    Foundation::RPC_E_CHANGED_MODE,
+    Foundation::{REGDB_E_CLASSNOTREG, RPC_E_CHANGED_MODE},
     Networking::NetworkListManager::{
         INetworkCostManager, NLM_CONNECTION_COST_FIXED, NLM_CONNECTION_COST_UNRESTRICTED,
         NLM_CONNECTION_COST_VARIABLE, NetworkListManager,
@@ -19,8 +19,11 @@ pub(crate) fn connection_cost() -> io::Result<ConnectionCost> {
     ensure_com_initialized()?;
 
     let manager: INetworkCostManager =
-        unsafe { CoCreateInstance(&NetworkListManager, None, CLSCTX_ALL) }
-            .map_err(|e| to_io_error(&e))?;
+        match unsafe { CoCreateInstance(&NetworkListManager, None, CLSCTX_ALL) } {
+            Ok(manager) => manager,
+            Err(e) if e.code() == REGDB_E_CLASSNOTREG => return Ok(ConnectionCost::Unknown),
+            Err(e) => return Err(to_io_error(&e)),
+        };
 
     let mut cost = MaybeUninit::<u32>::uninit();
     unsafe { manager.GetCost(cost.as_mut_ptr(), ptr::null()) }.map_err(|e| to_io_error(&e))?;
