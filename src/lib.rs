@@ -20,6 +20,15 @@
 //! # Ok(())
 //! # }
 //! ```
+//!
+//! For the underlying cost instead of a plain bool (e.g. to distinguish a known-unmetered
+//! connection from an unknown one), use [`connection_cost`]:
+//! ```rust
+//! # fn main() -> std::io::Result<()> {
+//! println!("{}", is_metered_network::connection_cost()?);
+//! # Ok(())
+//! # }
+//! ```
 
 #![warn(clippy::pedantic)]
 #![allow(clippy::missing_errors_doc)]

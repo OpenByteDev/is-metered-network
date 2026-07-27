@@ -24,13 +24,7 @@ if is_metered_network::check()? {
 
 For the underlying cost instead of a plain bool (e.g. to distinguish a known-unmetered connection from an unknown one), use [`connection_cost`](https://docs.rs/is-metered-network/latest/is_metered_network/fn.connection_cost.html):
 ```rust
-use is_metered_network::ConnectionCost;
-
-match is_metered_network::connection_cost()? {
-    ConnectionCost::Unmetered => println!("unmetered"),
-    ConnectionCost::Metered => println!("metered"),
-    ConnectionCost::Unknown => println!("unknown"),
-}
+println!("{}", is_metered_network::connection_cost()?);
 ```
 
 ## License
