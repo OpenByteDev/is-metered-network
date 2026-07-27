@@ -24,7 +24,7 @@
 #![warn(clippy::pedantic)]
 #![allow(clippy::missing_errors_doc)]
 
-use std::io;
+use std::{fmt, io};
 
 #[cfg(windows)]
 mod windows;
@@ -53,6 +53,16 @@ impl ConnectionCost {
     #[must_use]
     pub fn is_metered(self) -> bool {
         matches!(self, Self::Metered)
+    }
+}
+
+impl fmt::Display for ConnectionCost {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            Self::Unmetered => "unmetered",
+            Self::Metered => "metered",
+            Self::Unknown => "unknown",
+        })
     }
 }
 
