@@ -1,6 +1,6 @@
 use std::io;
 
-use zbus::blocking::{Connection, Proxy};
+use zbus::{Connection, Proxy};
 
 use crate::ConnectionCost;
 
@@ -10,22 +10,23 @@ const NM_METERED_GUESS_YES: u32 = 3;
 const NM_METERED_GUESS_NO: u32 = 4;
 
 pub(crate) fn connection_cost() -> io::Result<ConnectionCost> {
-    match query_network_manager() {
+    match zbus::block_on(query_network_manager()) {
         Ok(cost) => Ok(cost),
         Err(e) if is_service_unknown(&e) => Ok(ConnectionCost::Unknown),
         Err(e) => Err(to_io_error(e)),
     }
 }
 
-fn query_network_manager() -> zbus::Result<ConnectionCost> {
-    let connection = Connection::system()?;
+async fn query_network_manager() -> zbus::Result<ConnectionCost> {
+    let connection = Connection::system().await?;
     let proxy = Proxy::new(
         &connection,
         "org.freedesktop.NetworkManager",
         "/org/freedesktop/NetworkManager",
         "org.freedesktop.NetworkManager",
-    )?;
-    let metered: u32 = proxy.get_property("Metered")?;
+    )
+    .await?;
+    let metered: u32 = proxy.get_property("Metered").await?;
 
     Ok(match metered {
         NM_METERED_YES | NM_METERED_GUESS_YES => ConnectionCost::Metered,
@@ -35,7 +36,7 @@ fn query_network_manager() -> zbus::Result<ConnectionCost> {
 }
 
 fn is_service_unknown(e: &zbus::Error) -> bool {
-    matches!(e, zbus::Error::MethodError(name, ..) if name.as_str() == "org.freedesktop.DBus.Error.ServiceUnknown")
+    matches!(e, zbus::Error::FDO(e) if matches!(**e, zbus::fdo::Error::ServiceUnknown(_)))
 }
 
 fn to_io_error(e: zbus::Error) -> io::Error {

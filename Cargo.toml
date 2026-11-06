@@ -22,7 +22,7 @@ windows = { version = ">=0.59, <=0.62", default-features = false, features = [
 ] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-zbus = { version = "5.18", default-features = false, features = ["async-io", "blocking-api"] }
+zbus = { version = "6.2", default-features = false, features = ["default-rt", "proxy"] }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-pc-windows-msvc", "x86_64-unknown-linux-gnu"]
